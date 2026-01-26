@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>費波南希數列計算器 2026年更新版本</title>
+    <title>費波南茜數列計算器 2026年更新版本</title>
 	
  <!-- 				 === 【版權宣言】 ===
 		
@@ -18,7 +18,7 @@
  -->
     
     <style>
-        /* 1. 基础重置 + 容器锁定（提高选择器特异性） */
+        /* 1. 基礎重置 + 容器鎖定（提高選擇器特異性） */
         .fib-calculator {
             --primary-white: #ffffff;
             --title-bold: 700;
@@ -30,8 +30,8 @@
             margin: 0;
             padding: 0;
             font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang SC', sans-serif !important;
-            font-weight: var(--normal-weight) !important; /* 强制正常字重 */
-            color: #333333 !important; /* 全局默认文字色 */
+            font-weight: var(--normal-weight) !important; /* 強制正常字重 */
+            color: #333333 !important; /* 全域預設文字色 */
         }
         
         body {
@@ -40,7 +40,7 @@
             padding: 20px 0;
         }		
   
-        /* 2. 容器样式 */
+        /* 2. 容器樣式 */
         .fib-calculator {
             width: 100%;
             max-width: 800px;
@@ -49,28 +49,28 @@
             background-color: #e8f5e9;
         }
          
-        /* 3. 唯一粗体：大标题（单独锁定，优先级最高） */
+        /* 3. 唯一粗體：大標題（單獨鎖定，優先順序最高） */
         .fib-calculator .page-header h1 {
             font-size: 2.0rem !important;
             color: #3B82F6 !important;
             margin-bottom: 5px;
-            font-weight: var(--title-bold) !important; /* 仅此处粗体 */
+            font-weight: var(--title-bold) !important; /* 僅此處粗體 */
             text-align: center;
         }
 		
 		.fib-calculator .page-header a {
-			color: #ffffff !important; /* 文字改为白色 */
-			text-decoration: none !important; /* 移除下划线 */
+			color: #ffffff !important; /* 文字改為白色 */
+			text-decoration: none !important; /* 移除底線 */
 			background-color: #069eea;
 		}
 	
 		.fib-calculator .page-footer a {
 			color: #ffffff !important; /* 文字白色 */
-			text-decoration: none !important; /* 移除下划线 */
+			text-decoration: none !important; /* 移除底線 */
 			background-color: #036d0a;
 		}
         
-        /* 4. 所有其他文字元素：逐个锁定非粗体 */
+        /* 4. 所有其他文字元素：逐個鎖定非粗體 */
         .fib-calculator .page-header p,
         .fib-calculator .page-header a,
         .fib-calculator .input-group label,
@@ -85,11 +85,11 @@
         .fib-calculator .message,
         .fib-calculator .page-footer p,
         .fib-calculator .icon {
-            font-weight: var(--normal-weight) !important; /* 逐个确认非粗体 */
+            font-weight: var(--normal-weight) !important; /* 逐個確認非粗體 */
             font-size: 1.0rem !important;
         }
         
-        /* 5. 按钮样式：强制白色文字（穿透嵌套span） */
+        /* 5. 按鈕樣式：強制白色文字（穿透嵌套span） */
         .fib-calculator button {
             display: inline-flex;
             align-items: center;
@@ -106,11 +106,11 @@
             background-color: #3B82F6 !important;
         }
         
-        /* 按钮文字 + 嵌套span 强制白色（关键！之前可能漏了span） */
+        /* 按鈕文字 + 嵌套span 強制白色（關鍵！之前可能漏了span） */
         .fib-calculator button,
         .fib-calculator button span,
         .fib-calculator button .icon {
-            color: var(--primary-white) !important; /* 100%白色，不受任何影响 */
+            color: var(--primary-white) !important; /* 100%白色，不受任何影響 */
             font-weight: var(--normal-weight) !important;
         }
         
@@ -119,7 +119,7 @@
             opacity: 0.9;
         }
         
-        /* 按钮单独背景色（确保白色文字可见） */
+        /* 按鈕單獨背景色（確保白色文字可見） */
         .fib-calculator #calculateBtn {
             width: 100%;
             background-color: #3B82F6 !important;
@@ -135,7 +135,7 @@
             background-color: #8B5CF6 !important;
         }
         
-        /* 6. 其他结构样式（仅保留布局，无文字权重/颜色设置） */
+        /* 6. 其他結構樣式（僅保留佈局，無文字權重/顏色設置） */
         .page-header {
             text-align: center;
             margin-bottom: 20px;
@@ -328,10 +328,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <!-- 关键：给容器添加唯一类fib-calculator，确保样式穿透 -->
+    <!-- 關鍵：給容器添加唯一類fib-calculator，確保樣式穿透 -->
     <div class="fib-calculator" id="screenshotTarget">
         <header class="page-header">
-            <h1>費波南希數列自動計算器</h1>
+            <h1>費波南茜數列自動計算器</h1>
             <p><a href='https://snsim.futunn.com/share/server/j84D5?lang=zh-hk' target='_blank'>由 富途 【發哥免費指標王】 編寫免費分享</a></p>
         </header>
         
@@ -420,7 +420,7 @@
         </div>
         
         <footer class="page-footer">
-          <p><a href='https://snsim.futunn.com/share/server/j84D5?lang=zh-hk' target='_blank'>© 2026 費波南希數列計算工具 | 由 【富途 【發哥免費指標王】 編寫免費分享。</a></p>
+          <p><a href='https://snsim.futunn.com/share/server/j84D5?lang=zh-hk' target='_blank'>© 2026 費波南茜數列計算工具 | 由 【富途 【發哥免費指標王】 編寫免費分享。</a></p>
         </footer>
     </div>
     
@@ -493,7 +493,7 @@
         function calculateFall(high, low, isStock) {
             const totalRise = high - low;
             const currencySymbol = isStock ? '$' : '';
-            let result = `利用 富途 【發哥免費指標王】 的 【費波南希數列】 計算程式，【計算回跌位置】 結果如下：\n`;
+            let result = `利用 富途 【發哥免費指標王】 的 【費波南茜數列】 計算程式，【計算回跌位置】 結果如下：\n`;
             result += `【最高點】： ${currencySymbol}${high.toFixed(2)}\n`;
             result += `【最低點】： ${currencySymbol}${low.toFixed(2)}\n`;
             result += `【總升幅】： ${currencySymbol}${high.toFixed(2)} - ${currencySymbol}${low.toFixed(2)} = ${currencySymbol}${totalRise.toFixed(2)}\n`;
@@ -511,7 +511,7 @@
         function calculateRise(high, low, isStock) {
             const totalFall = high - low;
             const currencySymbol = isStock ? '$' : '';
-            let result = `利用 富途 【發哥免費指標王】 的 【費波南希數列】 計算程式，【計算回升位置】 結果如下：\n`;
+            let result = `利用 富途 【發哥免費指標王】 的 【費波南茜數列】 計算程式，【計算回升位置】 結果如下：\n`;
             result += `【最高點】： ${currencySymbol}${high.toFixed(2)}\n`;
             result += `【最低點】： ${currencySymbol}${low.toFixed(2)}\n`;
             result += `【總跌幅】： ${currencySymbol}${high.toFixed(2)} - ${currencySymbol}${low.toFixed(2)} = ${currencySymbol}${totalFall.toFixed(2)}\n`;
@@ -568,7 +568,7 @@
         function takeScreenshot() {
             html2canvas(screenshotTarget).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `費波南希數列計算結果_${new Date().getTime()}.png`;
+                link.download = `費波南茜數列計算結果_${new Date().getTime()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
