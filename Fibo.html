@@ -275,6 +275,9 @@
         .mt-2 {
             margin-top: 0.5rem;
         }
+        .mt-4 {
+            margin-top: 1rem;
+        }
         .inline-flex {
             display: inline-flex;
         }
@@ -389,6 +392,9 @@
         .bg-white {
             background-color: #ffffff;
         }
+        .bg-accent {
+            background-color: #8B5CF6;
+        }
         .p-2 {
             padding: 0.5rem;
         }
@@ -497,6 +503,9 @@
         }
         .hover\:bg-secondary\/90:hover {
             background-color: rgba(16, 185, 129, 0.9);
+        }
+        .hover\:bg-accent\/90:hover {
+            background-color: rgba(139, 92, 246, 0.9);
         }
         .hover\:shadow-xl:hover {
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -683,6 +692,12 @@
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
             transition-duration: 200ms;
         }
+        /* 固定截圖目標區域寬度，避免響應式壓縮 */
+        #screenshotTarget {
+            min-width: 640px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
     </style>
     
     <!-- 自定義圖標替代Font Awesome -->
@@ -743,10 +758,25 @@
             left: 0;
             font-size: 1em;
         }
+        
+        .icon-screenshot {
+            position: relative;
+            width: 1em;
+            height: 1em;
+        }
+        
+        .icon-screenshot::before {
+            content: "📷";
+            font-size: 1em;
+        }
     </style>
+    
+    <!-- 引入html2canvas庫（優化版，解決渲染兼容問題） -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-neutral">
-    <div class="container mx-auto px-4 py-8 max-w-3xl">
+    <!-- 淡綠色外層DIV：添加id用於指定截圖區域 -->
+    <div id="screenshotTarget" class="container mx-auto px-4 py-8 max-w-3xl">
         <!-- 頁面標題 -->
         <header class="text-center mb-8">
 			<h1 style="font-size: 2.0rem !important;" class="font-bold text-neutral mb-2 text-primary">費波南希數列自動計算器</h1>
@@ -888,15 +918,35 @@
         <div id="resultContainer" class="bg-white rounded-xl p-6 md:p-8 card-shadow mb-6 hidden">
             <h2 class="text-xl font-semibold mb-4 pb-2 border-b border-gray-200">計算結果</h2>
             <div id="resultContent" class="whitespace-pre-line text-gray-700 leading-relaxed mb-6"></div>
-            <button 
-                id="copyBtn" 
-                class="w-full bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors btn-effect flex items-center justify-center gap-2"
-            >
-                <span class="icon icon-copy"></span>
-                <span>複製結果</span>
-            </button>
+            
+            <!-- 按鈕組：複製結果 + 擷取頁面 -->
+            <div class="flex flex-col gap-4">
+                <button 
+                    id="copyBtn" 
+                    class="w-full bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors btn-effect flex items-center justify-center gap-2"
+                >
+                    <span class="icon icon-copy"></span>
+                    <span>複製結果</span>
+                </button>
+                
+                <button 
+                    id="screenshotBtn" 
+                    class="w-full bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded-lg transition-colors btn-effect flex items-center justify-center gap-2"
+                >
+                    <span class="icon icon-screenshot"></span>
+                    <span>擷取頁面</span>
+                </button>
+            </div>
+            
+            <!-- 操作反饋消息 -->
             <p id="copyMessage" class="text-center mt-2 text-green-600 text-sm hidden">
                 <span class="icon icon-check-circle"></span> 已複製到剪貼簿
+            </p>
+            <p id="screenshotMessage" class="text-center mt-2 text-green-600 text-sm hidden">
+                <span class="icon icon-check-circle"></span> 截圖已下載
+            </p>
+            <p id="screenshotError" class="text-center mt-2 text-red-500 text-sm hidden">
+                <span class="icon icon-check-circle"></span> 截圖失敗，請稍後重試
             </p>
         </div>
         
@@ -905,7 +955,7 @@
             <p>© 2025 費波南希數列計算工具 | <a href='https://snsim.futunn.com/share/server/j84D5?lang=zh-hk' target='_blank'>由 【富途 【發哥免費指標王】 編寫免費分享。</a></p>
         </footer>
     </div>
-
+    
     <script>
         // DOM元素
         const highInput = document.getElementById('high');
@@ -921,6 +971,10 @@
         const highCurrencySymbol = document.getElementById('highCurrencySymbol');
         const lowCurrencySymbol = document.getElementById('lowCurrencySymbol');
         const calcTypeContainer = document.getElementById('calcTypeContainer');
+        const screenshotBtn = document.getElementById('screenshotBtn');
+        const screenshotMessage = document.getElementById('screenshotMessage');
+        const screenshotError = document.getElementById('screenshotError');
+        const screenshotTarget = document.getElementById('screenshotTarget'); // 淡綠色外層截圖目標
         
         // 費波南希比率
         const ratios = [0.236, 0.382, 0.500, 0.618, 1.000, 1.618];
@@ -1026,6 +1080,129 @@
             return result;
         }
         
+        // 截圖核心功能（解決排版移位、文字模糊問題）
+        function takeScreenshot() {
+            // 隱藏所有提示消息
+            screenshotMessage.classList.add('hidden');
+            screenshotError.classList.add('hidden');
+            
+            // 1. 臨時禁用動畫/過渡效果（避免截圖時捕捉動態畫面）
+            const animatedElements = document.querySelectorAll('*[style*="animation"], *[style*="transition"]');
+            const animationStyles = [];
+            animatedElements.forEach(el => {
+                animationStyles.push({
+                    el: el,
+                    animation: el.style.animation,
+                    transition: el.style.transition
+                });
+                el.style.animation = 'none';
+                el.style.transition = 'none';
+            });
+            
+            // 2. 臨時替換Input為Span（解決原生Input渲染模糊問題）
+            const inputs = document.querySelectorAll('input');
+            const inputReplacements = [];
+            inputs.forEach(input => {
+                // 創建模擬Input的Span
+                const span = document.createElement('span');
+                // 複製Input的所有樣式（保證視覺一致）
+                const inputStyle = window.getComputedStyle(input);
+                span.style.cssText = `
+                    position: absolute;
+                    top: ${input.offsetTop}px;
+                    left: ${input.offsetLeft}px;
+                    width: ${input.offsetWidth}px;
+                    height: ${input.offsetHeight}px;
+                    padding: ${inputStyle.padding};
+                    margin: ${inputStyle.margin};
+                    font: ${inputStyle.font};
+                    color: ${inputStyle.color};
+                    background: ${inputStyle.background};
+                    border: ${inputStyle.border};
+                    border-radius: ${inputStyle.borderRadius};
+                    box-shadow: ${inputStyle.boxShadow};
+                    display: flex;
+                    align-items: center;
+                    z-index: 20;
+                `;
+                // 設置Span內容（Input的值）
+                span.textContent = input.value || input.placeholder;
+                // 添加到Input的父容器，並隱藏原始Input
+                input.parentNode.appendChild(span);
+                input.style.visibility = 'hidden';
+                // 保存替換記錄（用於後續還原）
+                inputReplacements.push({ input, span });
+            });
+            
+            // 3. 等待字體加載完成（避免文字渲染不完整）
+            document.fonts.ready.then(() => {
+                // 4. 配置html2canvas參數（優化渲染精度）
+                const screenshotOpts = {
+                    scale: window.devicePixelRatio || 2, // 匹配設備像素比，解決模糊
+                    useCORS: true, // 支持跨域資源
+                    logging: false, // 關閉日誌
+                    scrollX: 0, // 重置滾動位置，避免截圖偏移
+                    scrollY: 0,
+                    windowWidth: screenshotTarget.offsetWidth, // 匹配目標區域寬度
+                    windowHeight: screenshotTarget.offsetHeight, // 匹配目標區域高度
+                    backgroundColor: null, // 保持背景透明（避免多餘白色邊框）
+                    onclone: (cloneDoc) => {
+                        // 克隆DOM時修復樣式（解決Flex/Grid布局偏移）
+                        cloneDoc.querySelectorAll('*').forEach(el => {
+                            el.style.transform = 'none';
+                            el.style.position = el.style.position === 'fixed' ? 'absolute' : el.style.position;
+                        });
+                    }
+                };
+                
+                // 5. 執行截圖（優先指定淡綠色區域，失敗則 fallback 整頁）
+                const targetElement = screenshotTarget || document.body;
+                html2canvas(targetElement, screenshotOpts)
+                    .then(canvas => {
+                        // 下載截圖
+                        downloadScreenshot(canvas);
+                        // 顯示成功提示
+                        screenshotMessage.classList.remove('hidden');
+                        setTimeout(() => {
+                            screenshotMessage.classList.add('hidden');
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('截圖失敗:', err);
+                        screenshotError.textContent = `截圖失敗：${err.message}`;
+                        screenshotError.classList.remove('hidden');
+                    })
+                    .finally(() => {
+                        // 6. 還原頁面狀態（動畫、Input元素）
+                        animatedElements.forEach((el, index) => {
+                            el.style.animation = animationStyles[index].animation;
+                            el.style.transition = animationStyles[index].transition;
+                        });
+                        inputReplacements.forEach(item => {
+                            item.input.style.visibility = 'visible';
+                            item.span.remove();
+                        });
+                    });
+            });
+        }
+        
+        // 下載截圖（生成帶時間戳的文件名）
+        function downloadScreenshot(canvas) {
+            const link = document.createElement('a');
+            // 生成唯一文件名（格式：費波南希計算結果_20250126103000.png）
+            const timestamp = new Date().toISOString()
+                .replace(/[-:\.T]/g, '')
+                .slice(0, 14);
+            link.download = `費波南希計算結果_${timestamp}.png`;
+            // 轉換Canvas為高質量PNG
+            link.href = canvas.toDataURL('image/png', 1.0) // 1.0 表示最高質量
+                .replace('image/png', 'image/octet-stream');
+            // 觸發下載
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
         // 計算按鈕點擊事件
         calculateBtn.addEventListener('click', () => {
             if (validateInputs()) {
@@ -1075,6 +1252,18 @@
             });
         });
         
+        // 截圖按鈕點擊事件
+        screenshotBtn.addEventListener('click', () => {
+            // 按鈕反饋動畫
+            screenshotBtn.classList.add('bg-green-700');
+            setTimeout(() => {
+                screenshotBtn.classList.remove('bg-green-700');
+            }, 300);
+            
+            // 執行截圖
+            takeScreenshot();
+        });
+        
         // 計算對象切換事件
         document.querySelectorAll('input[name="calcTarget"]').forEach(radio => {
             radio.addEventListener('change', updateCurrencySymbols);
@@ -1103,4 +1292,3 @@
     </script>
 </body>
 </html>
-    
